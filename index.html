@@ -1,0 +1,1707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tales of Wisdom — FYP Progress & Gantt Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #F8F6F0;
+      --card: #FFFFFF;
+      --card-alt: #FBF9F5;
+      --border: #E8E3D8;
+      --border-dark: #D4CBBC;
+      --text: #1C1B18;
+      --text-muted: #6B685F;
+      --text-subtle: #969286;
+      --navy: #162B4D;
+      --navy-light: #234275;
+      --amber: #B87322;
+      --amber-bg: #FEF6EB;
+      --green: #227346;
+      --green-bg: #ECF8F0;
+      --red: #A32D2D;
+      --red-bg: #FDF0F0;
+      --blue: #2A78D6;
+      --teal: #1BAF7A;
+      --purple: #6250D6;
+      --coral: #E34948;
+      --pink: #E87BA4;
+      --gold: #EDA100;
+      --shadow-sm: 0 1px 3px rgba(28, 27, 24, 0.04), 0 4px 12px rgba(28, 27, 24, 0.02);
+      --shadow-md: 0 4px 16px rgba(28, 27, 24, 0.06);
+      --radius: 10px;
+      --radius-sm: 6px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      font-size: 14px;
+      -webkit-font-smoothing: antialiased;
+      padding-bottom: 80px;
+    }
+
+    /* Minimal Top Header */
+    header {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.02);
+    }
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 14px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .brand-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--navy);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      letter-spacing: -0.3px;
+    }
+    .brand-title span.badge {
+      font-size: 11px;
+      font-weight: 700;
+      background: #ECE7DD;
+      color: var(--navy);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+    .brand-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* 2 Main Tabs Navigation */
+    .main-nav {
+      max-width: 1200px;
+      margin: 20px auto 0;
+      padding: 0 24px;
+      display: flex;
+      gap: 10px;
+      border-bottom: 2px solid var(--border);
+    }
+    .nav-btn {
+      padding: 12px 24px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-btn:hover {
+      color: var(--navy);
+    }
+    .nav-btn.active {
+      color: var(--navy);
+      border-bottom-color: var(--navy);
+    }
+
+    /* Content Area */
+    main {
+      max-width: 1200px;
+      margin: 24px auto;
+      padding: 0 24px;
+    }
+    .page-view {
+      display: none;
+    }
+    .page-view.active {
+      display: block;
+      animation: fadeIn 0.15s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* KPI Summary Cards */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .kpi-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .kpi-lbl {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .kpi-val {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--navy);
+      margin: 4px 0;
+      font-feature-settings: "tnum";
+    }
+    .kpi-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Division Switcher (Layers vs Milestones) */
+    .switcher-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .toggle-pill-wrap {
+      display: inline-flex;
+      background: #ECE7DE;
+      padding: 4px;
+      border-radius: 8px;
+      gap: 4px;
+    }
+    .toggle-pill-btn {
+      border: none;
+      background: transparent;
+      padding: 8px 18px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .toggle-pill-btn.active {
+      background: var(--card);
+      color: var(--navy);
+      font-weight: 700;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    /* Collapsible Section Cards */
+    .section-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 12px;
+      transition: all 0.15s ease;
+      overflow: hidden;
+    }
+    .section-card:hover {
+      border-color: var(--border-dark);
+    }
+    .card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      cursor: pointer;
+      user-select: none;
+      background: #FFFFFF;
+      transition: background 0.12s ease;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .card-head:hover {
+      background: var(--card-alt);
+    }
+    .card-title-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      min-width: 260px;
+    }
+    .chevron-indicator {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #ECE7DD;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 800;
+      color: var(--navy);
+      transition: transform 0.2s ease;
+      flex-shrink: 0;
+    }
+    .section-card.expanded .chevron-indicator {
+      transform: rotate(90deg);
+    }
+    .tag-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      color: #FFF;
+      background: var(--navy);
+      flex-shrink: 0;
+    }
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+    .layer-tag {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--card-alt);
+      border: 1px solid var(--border);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+    .card-head-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .mini-bar-wrap {
+      width: 100px;
+      height: 6px;
+      background: #ECE7DC;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .mini-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+    .percentage-callout {
+      font-size: 15px;
+      font-weight: 800;
+      font-feature-settings: "tnum";
+      min-width: 75px;
+      text-align: right;
+    }
+
+    /* Collapsible Body Container */
+    .card-collapsible-body {
+      display: none;
+      padding: 0 20px 20px;
+      border-top: 1px solid var(--border);
+      background: #FFFFFF;
+      animation: expandDown 0.18s ease-out;
+    }
+    .section-card.expanded .card-collapsible-body {
+      display: block;
+    }
+    @keyframes expandDown {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin: 14px 0 10px;
+      line-height: 1.45;
+    }
+
+    /* Clean Full Progress Bar inside expanded body */
+    .bar-track {
+      width: 100%;
+      height: 8px;
+      background: #ECE7DC;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 8px 0 16px;
+      position: relative;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Checklist of Items */
+    .checklist-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .checklist {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+    .check-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 12px;
+      background: var(--card-alt);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.12s ease;
+      user-select: none;
+    }
+    .check-item:hover {
+      background: #F4EFE6;
+    }
+    .check-item.done {
+      background: #F2F8F4;
+      border-color: #BBE1C8;
+    }
+    .custom-checkbox {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--border-dark);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.15s ease;
+      background: #FFF;
+      font-size: 11px;
+    }
+    .check-item.done .custom-checkbox {
+      background: var(--green);
+      border-color: var(--green);
+      color: #FFF;
+    }
+    .check-text {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      flex: 1;
+    }
+    .check-item.done .check-text {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+    .check-chip {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: #ECE7DD;
+      padding: 2px 7px;
+      border-radius: 3px;
+    }
+    .check-item.done .check-chip {
+      background: #D8EFE0;
+      color: var(--green);
+    }
+
+    /* PAGE 2: GANTT & PROOF STYLING */
+    .gantt-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 24px;
+      overflow-x: auto;
+    }
+    .gantt-header {
+      position: relative;
+      height: 26px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 10px;
+    }
+    .gantt-month {
+      position: absolute;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--navy);
+      transform: translateX(-50%);
+    }
+    .gantt-row {
+      position: relative;
+      height: 38px;
+      display: flex;
+      align-items: center;
+    }
+    .gantt-lbl {
+      position: absolute;
+      left: 0;
+      width: 250px;
+      font-size: 12px;
+      font-weight: 600;
+      text-align: right;
+      padding-right: 14px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .gantt-track {
+      position: absolute;
+      left: 260px;
+      right: 0;
+      height: 100%;
+    }
+    .gantt-bar {
+      position: absolute;
+      height: 22px;
+      border-radius: 4px;
+      top: 8px;
+      overflow: hidden;
+      border: 1px solid;
+    }
+    .gantt-bar-fill {
+      height: 100%;
+      background: currentColor;
+      opacity: 0.85;
+      transition: width 0.3s ease;
+    }
+    .gantt-today {
+      position: absolute;
+      top: -26px;
+      bottom: 0;
+      width: 2px;
+      background: var(--red);
+      z-index: 10;
+      pointer-events: none;
+    }
+    .gantt-today-badge {
+      position: absolute;
+      top: -24px;
+      transform: translateX(-50%);
+      background: var(--red);
+      color: #FFF;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 3px;
+      white-space: nowrap;
+      z-index: 11;
+    }
+
+    /* Subsections Below Gantt */
+    .proof-section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 24px;
+    }
+    .proof-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--navy);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .proof-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 18px;
+    }
+
+    /* Tables */
+    .clean-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .clean-table th {
+      background: var(--card-alt);
+      color: var(--navy);
+      font-weight: 700;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+    .clean-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    .clean-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .status-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 12px;
+      display: inline-block;
+    }
+    .status-done { background: var(--green-bg); color: var(--green); }
+    .status-progress { background: #DBEAFE; color: #1D4ED8; }
+    .status-pending { background: #E2E8F0; color: #475569; }
+
+    /* Formula Box */
+    .formula-banner {
+      background: #F4EFE6;
+      border-left: 4px solid var(--navy);
+      padding: 14px 18px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+    .formula-code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--navy);
+      margin-top: 4px;
+    }
+
+    .btn {
+      padding: 6px 12px;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-outline {
+      background: transparent;
+      border-color: var(--border-dark);
+      color: var(--text);
+    }
+    .btn-outline:hover {
+      background: var(--card-alt);
+    }
+  
+    /* ======================================================== */
+    /* RESPONSIVE DESIGN (ZOOM IN/OUT & MULTI-DEVICE SUPPORT) */
+    /* ======================================================== */
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin-top: 10px;
+    }
+
+    /* Large tablets and zoom levels (around 992px) */
+    @media (max-width: 992px) {
+      .kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .card-head {
+        padding: 14px 18px;
+      }
+      .mini-bar-wrap {
+        width: 70px;
+      }
+    }
+
+    /* Small tablets, landscape phones & high zoom levels (around 768px) */
+    @media (max-width: 768px) {
+      .header-inner {
+        padding: 12px 18px;
+      }
+      .brand-title {
+        font-size: 16px;
+      }
+      .main-nav {
+        padding: 0 16px;
+        gap: 6px;
+      }
+      .nav-btn {
+        padding: 10px 16px;
+        font-size: 13px;
+      }
+      main {
+        padding: 0 16px;
+        margin: 18px auto;
+      }
+      .switcher-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+      }
+      .toggle-pill-wrap {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+      }
+      .toggle-pill-btn {
+        width: 100%;
+        text-align: center;
+        padding: 8px 12px;
+      }
+      .card-head {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      .card-title-group {
+        width: 100%;
+        min-width: 0;
+      }
+      .card-head-right {
+        width: 100%;
+        justify-content: space-between;
+      }
+      .mini-bar-wrap {
+        flex: 1;
+        max-width: 120px;
+      }
+      .percentage-callout {
+        min-width: auto;
+      }
+      .proof-section, .gantt-box {
+        padding: 16px;
+      }
+    }
+
+    /* Mobile screens & extra high zoom (around 520px and below) */
+    @media (max-width: 520px) {
+      .header-inner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 10px 14px;
+      }
+      .kpi-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+      .kpi-card {
+        padding: 14px 16px;
+      }
+      .kpi-val {
+        font-size: 24px;
+      }
+      .main-nav {
+        padding: 0 12px;
+      }
+      .nav-btn {
+        padding: 9px 12px;
+        font-size: 12px;
+      }
+      main {
+        padding: 0 12px;
+      }
+      .section-card {
+        margin-bottom: 10px;
+      }
+      .card-head {
+        padding: 12px 14px;
+      }
+      .card-collapsible-body {
+        padding: 0 14px 14px;
+      }
+      .check-item {
+        padding: 7px 10px;
+        gap: 9px;
+      }
+      .check-text {
+        font-size: 12px;
+      }
+      .clean-table th, .clean-table td {
+        padding: 8px 10px;
+        font-size: 11px;
+      }
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- Minimal Header -->
+  <header>
+    <div class="header-inner">
+      <div>
+        <div class="brand-title">
+          <span>Tales of Wisdom</span>
+          <span class="badge">FYP 2026–2027</span>
+        </div>
+        <div class="brand-sub">Aleena Memon (2380107) & Rauf Shahid (2380131) • Supervised by Laviza Asif</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-size:12px;color:var(--text-muted);" id="save-pill">✓ Saved locally</span>
+        <button class="btn btn-outline" onclick="resetChecklistPrompt()">↺ Reset Checklists</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 2 Main Tabs Navigation -->
+  <nav class="main-nav">
+    <button class="nav-btn active" id="tab-btn-1" onclick="switchPage('page-progress')">
+      ⚡ 1. Progress & Checklists
+    </button>
+    <button class="nav-btn" id="tab-btn-2" onclick="switchPage('page-gantt')">
+      📅 2. Gantt Chart & Weightage Proof
+    </button>
+  </nav>
+
+  <main>
+
+    <!-- ======================================================== -->
+    <!-- PAGE 1: PROGRESS & CHECKLISTS (TOGGLE LAYERS / MILESTONES) -->
+    <!-- ======================================================== -->
+    <section id="page-progress" class="page-view active">
+
+      <!-- Tangible, Sensible KPI Top Strip -->
+      <div class="kpi-grid">
+        <!-- 1. 50% Mid-Term Target with Dedicated Bar -->
+        <div class="kpi-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div class="kpi-lbl">50% Mid-Term Target</div>
+            <span style="font-size:10px;font-weight:700;background:#FEF6EB;color:var(--amber);padding:1px 6px;border-radius:4px;">Mid-Term Viva</span>
+          </div>
+          <div class="kpi-val" style="color:var(--amber);" id="kpi-midpoint-val">0.0% <span style="font-size:14px;font-weight:600;color:var(--text-subtle);">/ 50%</span></div>
+          <div style="width:100%;height:7px;background:#ECE7DC;border-radius:4px;overflow:hidden;margin:6px 0;position:relative;">
+            <div id="kpi-midpoint-bar" style="height:100%;width:0%;background:var(--amber);border-radius:4px;transition:width 0.35s ease;"></div>
+          </div>
+          <div class="kpi-sub" id="kpi-midpoint-sub">0.0% of mid-term milestone reached</div>
+        </div>
+
+        <!-- 2. Final-Term Target (100%) with Dedicated Bar -->
+        <div class="kpi-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div class="kpi-lbl">Final-Term Target</div>
+            <span style="font-size:10px;font-weight:700;background:#ECF8F0;color:var(--green);padding:1px 6px;border-radius:4px;">Final Viva</span>
+          </div>
+          <div class="kpi-val" style="color:var(--green);" id="kpi-final-val">0.0% <span style="font-size:14px;font-weight:600;color:var(--text-subtle);">/ 100%</span></div>
+          <div style="width:100%;height:7px;background:#ECE7DC;border-radius:4px;overflow:hidden;margin:6px 0;position:relative;">
+            <div id="kpi-final-bar" style="height:100%;width:0%;background:var(--green);border-radius:4px;transition:width 0.35s ease;"></div>
+          </div>
+          <div class="kpi-sub" id="kpi-tasks-count">0 of 57 deliverables verified</div>
+        </div>
+
+        <!-- 3. Deliverables Status Count -->
+        <div class="kpi-card">
+          <div class="kpi-lbl">Deliverables Status</div>
+          <div class="kpi-val" style="color:var(--navy);" id="kpi-verified-count">0 <span style="font-size:14px;font-weight:600;color:var(--text-subtle);">Done</span></div>
+          <div class="kpi-sub" id="kpi-pending-count">57 items pending completion</div>
+        </div>
+
+        <!-- 4. Final FYP Deadline -->
+        <div class="kpi-card">
+          <div class="kpi-lbl">FYP Target Deadline</div>
+          <div class="kpi-val" style="color:var(--coral);" id="kpi-days-left">--</div>
+          <div class="kpi-sub">Target • 1 December 2026</div>
+        </div>
+      </div>
+
+      <!-- Controls Row: Toggle View & Expand/Collapse All -->
+      <div class="switcher-row">
+        <div class="toggle-pill-wrap">
+          <button class="toggle-pill-btn active" id="btn-toggle-layers" onclick="setGrouping('layers')">
+            🏛️ Group by Layers (Frontend, Backend, Database, 3D, AI...)
+          </button>
+          <button class="toggle-pill-btn" id="btn-toggle-milestones" onclick="setGrouping('milestones')">
+            🎯 Group by Milestones (M1 – M13 Schedule)
+          </button>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button class="btn btn-outline" style="font-size:11px;" onclick="expandAll(true)">Expand All</button>
+          <button class="btn btn-outline" style="font-size:11px;" onclick="expandAll(false)">Collapse All</button>
+        </div>
+      </div>
+
+      <!-- Container where Collapsible Cards are rendered -->
+      <div id="cards-mount"></div>
+
+    </section>
+
+
+    <!-- ======================================================== -->
+    <!-- PAGE 2: GANTT CHART & WEIGHTAGE PROOF (2 DISTINCT SECTIONS) -->
+    <!-- ======================================================== -->
+    <section id="page-gantt" class="page-view">
+
+      <!-- TOP: Interactive Gantt Chart -->
+      <div class="gantt-box">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+          <div>
+            <h3 style="font-size:16px;color:var(--navy);font-weight:700;">Tales of Wisdom — Project Schedule (Gantt Chart)</h3>
+            <div style="font-size:12px;color:var(--text-muted);">1 August 2026 – 31 May 2027 • 518 Scheduled Milestone Days</div>
+          </div>
+          <div style="font-size:12px;color:var(--text-muted);">
+            Solid inner bar represents <strong>actual verified progress</strong> from Page 1 checklists.
+          </div>
+        </div>
+
+        <div id="gantt-mount"></div>
+      </div>
+
+      <!-- SECTION 1 BELOW GANTT: Current Percentages of Each Milestone in Gantt -->
+      <div class="proof-section">
+        <div class="proof-title">
+          <span>📊 Section 1: Milestone Progress & Completion Ledger</span>
+        </div>
+        <div class="proof-sub">
+          Shows the live completion percentage of each milestone in the Gantt chart, calculated directly from the verified checklist items on Page 1.
+        </div>
+
+        <div class="table-container">
+        <table class="clean-table">
+          <thead>
+            <tr>
+              <th style="width:50px;">#</th>
+              <th>Milestone Name</th>
+              <th>Layer</th>
+              <th>Duration</th>
+              <th>Weight %</th>
+              <th style="width:220px;">Actual Completion (from Checklist)</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="milestones-table-body"></tbody>
+        </table>
+        </div>
+      </div>
+
+      <!-- SECTION 2 BELOW GANTT: Why Each Milestone Has a Certain Percentage (Weightage Proof) -->
+      <div class="proof-section">
+        <div class="proof-title">
+          <span>⚖️ Section 2: Mathematical Proof & Academic Weightage Justification</span>
+        </div>
+        <div class="proof-sub">
+          Detailed defense answering why each milestone has been assigned its specific percentage weightage in the FYP evaluation.
+        </div>
+
+        <!-- The Governing Mathematical Law -->
+        <div class="formula-banner">
+          <strong style="color:var(--navy);font-size:13px;">The Mathematical Weightage Formula:</strong>
+          <div class="formula-code">
+            Milestone Weightage (%) = [ Scheduled Days (End - Start + 1) / Total Project Days (518) ] × 100%
+          </div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:6px;">
+            This formula removes subjective grading bias by proportionally anchoring each milestone's weight to the actual engineering time, architectural complexity, and cognitive load required.
+          </div>
+        </div>
+
+        <!-- Detailed Justification Table -->
+        <div class="table-container">
+        <table class="clean-table">
+          <thead>
+            <tr>
+              <th style="width:40px;">#</th>
+              <th style="width:230px;">Milestone Name</th>
+              <th style="width:70px;">Days</th>
+              <th style="width:80px;">Weight %</th>
+              <th>Engineering Justification (Why this percentage is allocated)</th>
+            </tr>
+          </thead>
+          <tbody id="justification-table-body"></tbody>
+        </table>
+        </div>
+
+        <!-- Architectural Layer Roll-up Justification -->
+        <div style="margin-top:28px;">
+          <h4 style="font-size:15px;color:var(--navy);margin-bottom:8px;">Architectural Layer Roll-Up Summary</h4>
+          <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px;">
+            Grouping milestone weightages into the 6 system layers provides the macro architectural distribution:
+          </p>
+          <div class="table-container">
+          <table class="clean-table">
+            <thead>
+              <tr>
+                <th>Layer</th>
+                <th>Included Milestones</th>
+                <th>Total Scheduled Days</th>
+                <th>Layer Weight %</th>
+                <th>Architectural Justification</th>
+              </tr>
+            </thead>
+            <tbody id="layer-rollup-table-body"></tbody>
+          </table>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <script>
+    // -------------------------------------------------------------
+    // TALES OF WISDOM DATA MODEL (CHECKLISTS, MILESTONES & LAYERS)
+    // -------------------------------------------------------------
+    const GANTT_COLORS = {
+      blue: "#2a78d6",
+      teal: "#1baf7a",
+      orange: "#eb6834",
+      purple: "#6250d6",
+      coral: "#e34948",
+      pink: "#e87ba4",
+      gold: "#eda100"
+    };
+
+    // The 13 Milestones with granular checklists extracted from the FYP skills & proposal
+    const MILESTONES_DATA = [
+      {
+        id: 1,
+        name: "Requirement Analysis & Curriculum Mapping",
+        start: "2026-08-01",
+        end: "2026-09-15",
+        layer: "Planning & Content",
+        layerKey: "planning",
+        color: GANTT_COLORS.blue,
+        justification: "Requires thorough extraction of authoritative CS textbook chapter & section hierarchy, setting unambiguous IDs, tagging difficulty levels, and securing formal supervisor sign-off before coding begins.",
+        items: [
+          { id: "m1-1", text: "Select and fix authoritative Computer Science textbook and primary chapter" },
+          { id: "m1-2", text: "Construct deterministic topic tree with clear IDs and difficulty tags" },
+          { id: "m1-3", text: "Map source text and factual concepts directly to topics" },
+          { id: "m1-4", text: "Author Software Requirements Specification (SRS) document with Functional & Non-Functional requirements" },
+          { id: "m1-5", text: "Obtain formal supervisor sign-off on SRS and curriculum boundaries" }
+        ]
+      },
+      {
+        id: 2,
+        name: "Character Pipeline (VRoid / Mixamo / R3F)",
+        start: "2026-08-15",
+        end: "2026-10-15",
+        layer: "3D & Characters",
+        layerKey: "3d",
+        color: GANTT_COLORS.teal,
+        justification: "High-effort visual engineering: modeling 3D avatars in VRoid, skeletal rigging and animation retargeting in Mixamo, loading into React Three Fiber, and coding the dynamic Zeigarnik opacity shaders for the Shadow.",
+        items: [
+          { id: "m2-1", text: "Model and export base Boy avatar in VRoid Studio" },
+          { id: "m2-2", text: "Model and export base Girl avatar in VRoid Studio" },
+          { id: "m2-3", text: "Retarget animations (idle, walk, inspect) in Mixamo and load in browser" },
+          { id: "m2-4", text: "Configure Narrator character with Beat Trio phase accessories" },
+          { id: "m2-5", text: "Build Shadow antagonist 3D shader with dynamic opacity control (0.0 to 1.0)" }
+        ]
+      },
+      {
+        id: 3,
+        name: "Database Schema Design & Neon/pgvector Setup",
+        start: "2026-09-16",
+        end: "2026-10-15",
+        layer: "Database",
+        layerKey: "database",
+        color: GANTT_COLORS.orange,
+        justification: "Critical data foundation: setting up serverless Neon PostgreSQL, enabling the pgvector vector similarity extension, building 19 Drizzle ORM schema tables, and running relational migrations.",
+        items: [
+          { id: "m3-1", text: "Provision managed serverless PostgreSQL instance on Neon Cloud" },
+          { id: "m3-2", text: "Enable pgvector extension and test vector similarity distance operators" },
+          { id: "m3-3", text: "Write Drizzle ORM schema (users, stories, challenges, dialogue, user_stats)" },
+          { id: "m3-4", text: "Execute automated database migration scripts and seed initial topic data" }
+        ]
+      },
+      {
+        id: 4,
+        name: "AI Narrative Layer (Chunking, Embedding, Retrieval)",
+        start: "2026-10-16",
+        end: "2026-11-30",
+        layer: "AI & RAG",
+        layerKey: "ai",
+        color: GANTT_COLORS.blue,
+        justification: "Core anti-hallucination pipeline: parsing CS textbook PDF, semantically chunking by chapter headings, generating Nomic embeddings, and validating scoped topic-tagged retrieval on a test dataset.",
+        items: [
+          { id: "m4-1", text: "Build PDF text extraction and automated cleaning script" },
+          { id: "m4-2", text: "Implement heading-based semantic chunker (200-500 words per concept)" },
+          { id: "m4-3", text: "Generate high-dimensional vector embeddings via Nomic Embedding API" },
+          { id: "m4-4", text: "Store vectors in pgvector and verify scoped similarity retrieval accuracy" }
+        ]
+      },
+      {
+        id: 5,
+        name: "Game Logic Layer (XP, Mastery, Shadow Meter)",
+        start: "2026-10-01",
+        end: "2026-11-15",
+        layer: "Game Logic",
+        layerKey: "game_logic",
+        color: GANTT_COLORS.purple,
+        justification: "Purely deterministic pedagogical math: Domain XP formula (Generation Bonus), Insight Points engagement metric, Teusner Struggle Delta calculator, Shadow Meter (0-100), and Spaced Mastery state machine.",
+        items: [
+          { id: "m5-1", text: "Implement Domain XP formula with Difficulty & First-Try generation multipliers" },
+          { id: "m5-2", text: "Implement Insight Points (IP) calculator for Phase 1 & Phase 2 engagement" },
+          { id: "m5-3", text: "Implement Struggle Delta formula (wrong attempts, time, partial correctness)" },
+          { id: "m5-4", text: "Implement Shadow Meter state machine (0 to 100 with 40 residual clamp)" },
+          { id: "m5-5", text: "Implement Spaced-Retrieval mastery logic and badge eligibility rules" },
+          { id: "m5-6", text: "Write comprehensive unit tests validating progression formulas" }
+        ]
+      },
+      {
+        id: 6,
+        name: "3D Test-Phase Environment (Room Blueprints)",
+        start: "2026-10-16",
+        end: "2026-12-15",
+        layer: "3D & Characters",
+        layerKey: "3d",
+        color: GANTT_COLORS.coral,
+        justification: "Large 3D milestone: creating walkable room blueprints (Kingdom & Archive) with bounding box collisions, interactive clickable pedestals, and triggering the Shadow confrontation when meter crosses 100.",
+        items: [
+          { id: "m6-1", text: "Build walkable 3D room environment with keyboard/mouse navigation" },
+          { id: "m6-2", text: "Implement collision boundaries preventing avatar clipping through walls" },
+          { id: "m6-3", text: "Add clickable puzzle pedestals that open challenge modal overlays" },
+          { id: "m6-4", text: "Design two reusable room blueprints (The Kingdom and The Archive)" },
+          { id: "m6-5", text: "Wire Shadow antagonist visual confrontation trigger when meter reaches 100" }
+        ]
+      },
+      {
+        id: 7,
+        name: "Prompt Architecture & LLM Integration",
+        start: "2026-12-01",
+        end: "2026-12-31",
+        layer: "AI & RAG",
+        layerKey: "ai",
+        color: GANTT_COLORS.pink,
+        justification: "Bridges textbook chunks to narrative fiction: authoring Jinja2 templates for narrative styles, connecting to Ollama Cloud LLM, and generating and storing pre-computed story text for Chapter 1.",
+        items: [
+          { id: "m7-1", text: "Design Jinja2 system prompt templates for varied narrative styles" },
+          { id: "m7-2", text: "Establish reliable inference connector to Ollama Cloud / local SLM" },
+          { id: "m7-3", text: "Build batch script to generate and pre-store stories in PostgreSQL" },
+          { id: "m7-4", text: "Generate, sample, and fact-check all stories for Chapter 1" },
+          { id: "m7-5", text: "Prepare tiered puzzle and Socratic hint bank" }
+        ]
+      },
+      {
+        id: 8,
+        name: "Backend API Development & Authentication",
+        start: "2026-11-16",
+        end: "2026-12-15",
+        layer: "Backend",
+        layerKey: "backend",
+        color: GANTT_COLORS.gold,
+        justification: "Core services engineering: NextAuth signup and login session handling, OTP email dispatching, story delivery endpoints, and attempt submission route handlers.",
+        items: [
+          { id: "m8-1", text: "Implement user authentication with NextAuth and session cookies" },
+          { id: "m8-2", text: "Build OTP email verification service with nodemailer" },
+          { id: "m8-3", text: "Build stored-story delivery API route (/api/stories)" },
+          { id: "m8-4", text: "Build challenge attempt submission and progress update API routes" }
+        ]
+      },
+      {
+        id: 9,
+        name: "Frontend: Beat Trio Screens & HUD Components",
+        start: "2027-01-01",
+        end: "2027-02-15",
+        layer: "Frontend",
+        layerKey: "frontend",
+        color: GANTT_COLORS.blue,
+        justification: "Primary user-facing UI: Screen 4 onboarding diagnostic, Learn phase interleaved story reader (60-70% factual density), Socratic Apply reflection screen, and in-game HUD (XP, Level, Shadow Meter).",
+        items: [
+          { id: "m9-1", text: "Build Screen 4 Onboarding 5-question learning style diagnostic" },
+          { id: "m9-2", text: "Build Learn Screen with interleaved 60-70% factual density layout" },
+          { id: "m9-3", text: "Build Apply Screen with conversational Socratic inquiry interface" },
+          { id: "m9-4", text: "Build Test phase puzzle overlay with interactive code editor" },
+          { id: "m9-5", text: "Build in-game HUD telemetry bar (XP, Level, Shadow Meter, Insight Points)" }
+        ]
+      },
+      {
+        id: 10,
+        name: "End-to-End System Integration",
+        start: "2027-02-16",
+        end: "2027-03-15",
+        layer: "Integration & QA",
+        layerKey: "integration",
+        color: GANTT_COLORS.pink,
+        justification: "Unifying all 5 layers: ensuring a student can navigate from Onboarding to Learn -> Apply -> Test -> Shadow Scaffolding, with XP and progress persisting seamlessly in Neon PostgreSQL.",
+        items: [
+          { id: "m10-1", text: "Wire complete Beat Trio journey (Learn -> Apply -> Test) front-to-back" },
+          { id: "m10-2", text: "Connect Test phase challenge attempts directly to game logic context" },
+          { id: "m10-3", text: "Verify Shadow confrontation loop and scaffolding problem resolution" },
+          { id: "m10-4", text: "Confirm student XP, Level, and Badges persist reliably in Neon database" }
+        ]
+      },
+      {
+        id: 11,
+        name: "System Testing & Refinement",
+        start: "2027-03-16",
+        end: "2027-04-15",
+        layer: "Integration & QA",
+        layerKey: "integration",
+        color: GANTT_COLORS.teal,
+        justification: "Quality assurance & WebGL optimization: executing formal test matrix, validating stable 60 FPS 3D rendering on standard laptops (Intel UHD Graphics), cross-browser audits, and closing bug tracker.",
+        items: [
+          { id: "m11-1", text: "Execute formal software engineering test plan across all modules" },
+          { id: "m11-2", text: "Conduct WebGL 60 FPS performance audit on standard student hardware" },
+          { id: "m11-3", text: "Verify cross-browser compatibility (Chrome, Firefox, Edge, Safari)" },
+          { id: "m11-4", text: "Fix reported issues and close project bug tracker" }
+        ]
+      },
+      {
+        id: 12,
+        name: "Final Documentation & Report Preparation",
+        start: "2027-04-01",
+        end: "2027-05-10",
+        layer: "Planning & Content",
+        layerKey: "planning",
+        color: GANTT_COLORS.gold,
+        justification: "Formal academic requirement: drafting comprehensive FYP thesis (Chapters 1-6), literature review mapping across 7 foundational papers, UML/ERD architectural diagrams, and plagiarism checks.",
+        items: [
+          { id: "m12-1", text: "Draft final report chapters 1 through 6 in IEEE/university format" },
+          { id: "m12-2", text: "Compile complete system architecture, sequence, and database ERD diagrams" },
+          { id: "m12-3", text: "Verify citations and academic justification across 7 foundational papers" }
+        ]
+      },
+      {
+        id: 13,
+        name: "Final Presentation & Viva Preparation",
+        start: "2027-05-11",
+        end: "2027-05-31",
+        layer: "Planning & Content",
+        layerKey: "planning",
+        color: GANTT_COLORS.coral,
+        justification: "Final examination & defense: designing slide deck, recording backup offline demo video, conducting mock viva sessions, and defending pedagogical & mathematical decisions.",
+        items: [
+          { id: "m13-1", text: "Design formal viva defense presentation slide deck" },
+          { id: "m13-2", text: "Record live system demo walkthrough and prepare offline backup video" },
+          { id: "m13-3", text: "Conduct mock viva Q&A defense rehearsals (Aleena & Rauf)" }
+        ]
+      }
+    ];
+
+    // The 6 System Layers definition
+    const LAYERS_DEF = [
+      { key: "frontend", name: "Frontend Layer (Beat Trio & HUD)", color: GANTT_COLORS.blue, desc: "User interfaces: Onboarding, Learn interleaved story reader, Socratic Apply dialogue, and in-game HUD telemetry." },
+      { key: "3d", name: "3D & Character Pipeline", color: GANTT_COLORS.teal, desc: "VRoid 3D avatars, Mixamo animations, 3D Ancient Codex mesh, walkable room blueprints, and Zeigarnik opacity shaders." },
+      { key: "database", name: "Database & Vector Layer", color: GANTT_COLORS.orange, desc: "Managed serverless Neon PostgreSQL, pgvector extension, and 19 Drizzle ORM relational schema tables." },
+      { key: "backend", name: "Backend Services & Authentication", color: GANTT_COLORS.gold, desc: "Next.js API route handlers, NextAuth session authentication, OTP email verification, and story delivery." },
+      { key: "ai", name: "AI Narrative & RAG Layer", color: GANTT_COLORS.pink, desc: "PDF extraction, heading-based chunker, Nomic embeddings, scoped pgvector retrieval, and Jinja2 prompt architecture." },
+      { key: "game_logic", name: "Game Logic & Scaffolding Engine", color: GANTT_COLORS.purple, desc: "Deterministic mathematical progression: Domain XP, Insight Points, Struggle Score, and Shadow Meter state machine." },
+      { key: "planning", name: "Planning, Content & Viva Defense", color: GANTT_COLORS.coral, desc: "Curriculum mapping from textbook, thesis documentation, 7 research papers literature defense, and presentation slides." },
+      { key: "integration", name: "Integration & Quality Assurance", color: GANTT_COLORS.teal, desc: "End-to-end user journey wiring, WebGL 60 FPS performance audits, cross-browser compatibility, and bug closure." }
+    ];
+
+    const STORAGE_KEY = "tales_of_wisdom_checklist_state_v5";
+
+    // App state
+    let state = {
+      checkedItems: {}, // { "m1-1": true, ... }
+      expandedCards: {}, // { "layer-frontend": false, ... }
+      activePage: "page-progress",
+      grouping: "layers" // "layers" or "milestones"
+    };
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.checkedItems) state.checkedItems = parsed.checkedItems;
+          if (parsed && parsed.expandedCards) state.expandedCards = parsed.expandedCards;
+          if (parsed && parsed.grouping) state.grouping = parsed.grouping;
+        }
+      } catch (e) {}
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      const el = document.getElementById("save-pill");
+      if (el) el.textContent = "✓ Saved " + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function toggleCheck(itemId, ev) {
+      if (ev) ev.stopPropagation();
+      if (state.checkedItems[itemId]) {
+        delete state.checkedItems[itemId];
+      } else {
+        state.checkedItems[itemId] = true;
+      }
+      saveState();
+      renderApp();
+    }
+
+    function toggleCardCollapse(cardId) {
+      state.expandedCards[cardId] = !state.expandedCards[cardId];
+      saveState();
+      const cardEl = document.getElementById("card-" + cardId);
+      if (cardEl) {
+        cardEl.classList.toggle("expanded", !!state.expandedCards[cardId]);
+      }
+    }
+
+    function expandAll(expand) {
+      const allIds = [];
+      if (state.grouping === "layers") {
+        LAYERS_DEF.forEach(l => allIds.push("layer-" + l.key));
+      } else {
+        MILESTONES_DATA.forEach(m => allIds.push("m-" + m.id));
+      }
+      allIds.forEach(id => {
+        state.expandedCards[id] = expand;
+        const cardEl = document.getElementById("card-" + id);
+        if (cardEl) cardEl.classList.toggle("expanded", expand);
+      });
+      saveState();
+    }
+
+    function resetChecklistPrompt() {
+      if (confirm("Reset all checklists back to 0% (Not Started)?")) {
+        state.checkedItems = {};
+        saveState();
+        renderApp();
+      }
+    }
+
+    // -------------------------------------------------------------
+    // PROGRESS CALCULATIONS
+    // -------------------------------------------------------------
+    function calculateProgress() {
+      const TOTAL_DAYS = 518;
+      let totalChecked = 0;
+      let totalItems = 0;
+      let overallActual = 0;
+      let overallPlanned = 0;
+
+      const today = new Date();
+
+      // Milestone calculations
+      const milestoneResults = MILESTONES_DATA.map(m => {
+        const mItems = m.items || [];
+        const checkedCount = mItems.filter(it => state.checkedItems[it.id]).length;
+        const compPct = mItems.length > 0 ? (checkedCount / mItems.length) * 100 : 0;
+
+        totalChecked += checkedCount;
+        totalItems += mItems.length;
+
+        const s = new Date(m.start);
+        const e = new Date(m.end);
+        const days = Math.round((e - s) / (1000 * 60 * 60 * 24)) + 1;
+        const weight = (days / TOTAL_DAYS) * 100;
+
+        let frac = 0;
+        if (today < s) frac = 0;
+        else if (today >= e) frac = 1;
+        else frac = Math.max(0, Math.min(1, ((today - s) / (1000 * 60 * 60 * 24) + 1) / days));
+
+        overallActual += (weight * (compPct / 100));
+        overallPlanned += (weight * frac);
+
+        let status = "Not Started";
+        if (compPct === 100) status = "Completed";
+        else if (compPct > 0) status = "In Progress";
+        else if (today > e) status = "Overdue";
+
+        return {
+          ...m,
+          days,
+          weight,
+          compPct,
+          checkedCount,
+          totalCount: mItems.length,
+          status
+        };
+      });
+
+      // Layer calculations
+      const layerResults = LAYERS_DEF.map(l => {
+        const linkedMilestones = milestoneResults.filter(m => m.layerKey === l.key);
+        let lItems = [];
+        let lChecked = 0;
+        let lWeight = 0;
+        let lDays = 0;
+
+        linkedMilestones.forEach(m => {
+          lItems.push(...m.items);
+          lChecked += m.checkedCount;
+          lWeight += m.weight;
+          lDays += m.days;
+        });
+
+        const compPct = lItems.length > 0 ? (lChecked / lItems.length) * 100 : 0;
+
+        return {
+          ...l,
+          items: lItems,
+          checkedCount: lChecked,
+          totalCount: lItems.length,
+          compPct,
+          weight: lWeight,
+          days: lDays,
+          milestones: linkedMilestones
+        };
+      });
+
+      const variance = overallActual - overallPlanned;
+      let health = "On track";
+      if (variance >= 2.0) health = "Ahead of schedule";
+      else if (variance < -2.0) health = "Behind schedule";
+
+      return {
+        totalDays: TOTAL_DAYS,
+        totalChecked,
+        totalItems,
+        overallActual,
+        overallPlanned,
+        variance,
+        health,
+        milestones: milestoneResults,
+        layers: layerResults
+      };
+    }
+
+    // -------------------------------------------------------------
+    // RENDERING
+    // -------------------------------------------------------------
+    function renderApp() {
+      const data = calculateProgress();
+
+      // Top KPI Cards: 50% Mid-Term & 100% Final-Term Targets
+      const midpointProgress = Math.min(100, (data.overallActual / 50) * 100);
+      document.getElementById("kpi-midpoint-val").innerHTML = `${data.overallActual.toFixed(1)}% <span style="font-size:14px;font-weight:600;color:var(--text-subtle);">/ 50%</span>`;
+      const midBar = document.getElementById("kpi-midpoint-bar");
+      midBar.style.width = `${midpointProgress}%`;
+
+      if (data.overallActual >= 50) {
+        document.getElementById("kpi-midpoint-sub").innerHTML = `<span style="color:var(--green);font-weight:700;">✓ 50% Mid-term reached!</span>`;
+        midBar.style.background = "var(--green)";
+      } else {
+        document.getElementById("kpi-midpoint-sub").textContent = `${midpointProgress.toFixed(1)}% of 50% target reached`;
+        midBar.style.background = "var(--amber)";
+      }
+
+      // Final-Term Target (100%)
+      const finalValEl = document.getElementById("kpi-final-val");
+      if (finalValEl) finalValEl.innerHTML = `${data.overallActual.toFixed(1)}% <span style="font-size:14px;font-weight:600;color:var(--text-subtle);">/ 100%</span>`;
+      const finalBar = document.getElementById("kpi-final-bar");
+      if (finalBar) finalBar.style.width = `${data.overallActual}%`;
+      const tCountEl = document.getElementById("kpi-tasks-count");
+      if (tCountEl) tCountEl.textContent = `${data.totalChecked} of ${data.totalItems} deliverables verified`;
+
+      // Deliverables Status Count
+      const pendingCount = data.totalItems - data.totalChecked;
+      const vEl = document.getElementById("kpi-verified-count");
+      if (vEl) vEl.innerHTML = `${data.totalChecked} <span style="font-size:14px;font-weight:600;color:var(--text-subtle);">Done</span>`;
+      const pEl = document.getElementById("kpi-pending-count");
+      if (pEl) pEl.textContent = `${pendingCount} items pending completion`;
+
+      const deadline = new Date("2026-12-01");
+      const rem = Math.round((deadline - new Date()) / (1000 * 60 * 60 * 24));
+      document.getElementById("kpi-days-left").textContent = rem > 0 ? `${rem} days` : "Deadline Reached";
+
+      // Render Cards on Page 1 (Collapsible, only headings show by default)
+      renderPage1Cards(data);
+
+      // Render Gantt on Page 2
+      renderGanttChart(data);
+
+      // Render Section 1 below Gantt
+      renderMilestonesTable(data);
+
+      // Render Section 2 below Gantt (Justification & Proof)
+      renderJustificationTable(data);
+      renderLayerRollupTable(data);
+    }
+
+    function renderPage1Cards(data) {
+      const mount = document.getElementById("cards-mount");
+      let html = "";
+
+      if (state.grouping === "layers") {
+        // Group by Layers (Collapsible)
+        data.layers.forEach(l => {
+          const cardId = "layer-" + l.key;
+          const isExpanded = !!state.expandedCards[cardId];
+
+          html += `
+            <div class="section-card ${isExpanded ? 'expanded' : ''}" id="card-${cardId}">
+              <!-- Heading row (Always showing) -->
+              <div class="card-head" onclick="toggleCardCollapse('${cardId}')">
+                <div class="card-title-group">
+                  <div class="chevron-indicator">▶</div>
+                  <span class="tag-badge" style="background:${l.color};">LAYER</span>
+                  <span class="card-title">${l.name}</span>
+                </div>
+                <div class="card-head-right">
+                  <div class="mini-bar-wrap">
+                    <div class="mini-bar-fill" style="width:${l.compPct}%;background:${l.color};"></div>
+                  </div>
+                  <span class="percentage-callout" style="color:${l.color};">${l.compPct.toFixed(1)}% Done</span>
+                </div>
+              </div>
+
+              <!-- Collapsible Body (Hidden by default, shown when expanded) -->
+              <div class="card-collapsible-body">
+                <div class="card-desc">${l.desc}</div>
+
+                <div class="bar-track">
+                  <div class="bar-fill" style="width:${l.compPct}%;background:${l.color};"></div>
+                </div>
+
+                <div class="checklist-title">
+                  <span>Deliverable Checklists (${l.checkedCount} of ${l.totalCount} completed)</span>
+                  <span>Click item to toggle</span>
+                </div>
+
+                <div class="checklist">
+                  ${l.items.map(it => {
+                    const isDone = !!state.checkedItems[it.id];
+                    return `
+                      <div class="check-item ${isDone ? 'done' : ''}" onclick="toggleCheck('${it.id}', event)">
+                        <div class="custom-checkbox">${isDone ? '✓' : ''}</div>
+                        <div class="check-text">${it.text}</div>
+                        <span class="check-chip">${isDone ? 'Completed' : 'Pending'}</span>
+                      </div>
+                    `;
+                  }).join("")}
+                </div>
+              </div>
+            </div>
+          `;
+        });
+      } else {
+        // Group by Milestones (Collapsible)
+        data.milestones.forEach(m => {
+          const cardId = "m-" + m.id;
+          const isExpanded = !!state.expandedCards[cardId];
+
+          html += `
+            <div class="section-card ${isExpanded ? 'expanded' : ''}" id="card-${cardId}">
+              <!-- Heading row (Always showing) -->
+              <div class="card-head" onclick="toggleCardCollapse('${cardId}')">
+                <div class="card-title-group">
+                  <div class="chevron-indicator">▶</div>
+                  <span class="tag-badge" style="background:${m.color};">M${m.id}</span>
+                  <span class="card-title">${m.name}</span>
+                  <span class="layer-tag">${m.layer}</span>
+                </div>
+                <div class="card-head-right">
+                  <span style="font-size:11px;color:var(--text-muted);">${m.days}d</span>
+                  <div class="mini-bar-wrap">
+                    <div class="mini-bar-fill" style="width:${m.compPct}%;background:${m.color};"></div>
+                  </div>
+                  <span class="percentage-callout" style="color:${m.color};">${m.compPct.toFixed(1)}% Done</span>
+                </div>
+              </div>
+
+              <!-- Collapsible Body (Hidden by default, shown when expanded) -->
+              <div class="card-collapsible-body">
+                <div class="card-desc">Scheduled: ${m.start} to ${m.end} (${m.days} days) • Milestone Weight: <strong>${m.weight.toFixed(2)}%</strong></div>
+
+                <div class="bar-track">
+                  <div class="bar-fill" style="width:${m.compPct}%;background:${m.color};"></div>
+                </div>
+
+                <div class="checklist-title">
+                  <span>Checklist Items (${m.checkedCount} of ${m.totalCount} completed)</span>
+                  <span style="color:${m.compPct === 100 ? 'var(--green)' : 'var(--navy)'};font-weight:700;">${m.status}</span>
+                </div>
+
+                <div class="checklist">
+                  ${m.items.map(it => {
+                    const isDone = !!state.checkedItems[it.id];
+                    return `
+                      <div class="check-item ${isDone ? 'done' : ''}" onclick="toggleCheck('${it.id}', event)">
+                        <div class="custom-checkbox">${isDone ? '✓' : ''}</div>
+                        <div class="check-text">${it.text}</div>
+                        <span class="check-chip">${isDone ? 'Completed' : 'Pending'}</span>
+                      </div>
+                    `;
+                  }).join("")}
+                </div>
+              </div>
+            </div>
+          `;
+        });
+      }
+
+      mount.innerHTML = html;
+    }
+
+    // -------------------------------------------------------------
+    // GANTT CHART RENDERER (PAGE 2)
+    // -------------------------------------------------------------
+    function renderGanttChart(data) {
+      const container = document.getElementById("gantt-mount");
+      const START = new Date("2026-08-01");
+      const END = new Date("2027-05-31");
+      const totalSpan = (END - START) / (1000 * 60 * 60 * 24);
+
+      function pct(dStr) {
+        const d = new Date(dStr);
+        return Math.max(0, Math.min(100, ((d - START) / (1000 * 60 * 60 * 24) / totalSpan) * 100));
+      }
+
+      const months = ["2026-08-01", "2026-09-01", "2026-10-01", "2026-11-01", "2026-12-01", "2027-01-01", "2027-02-01", "2027-03-01", "2027-04-01", "2027-05-01"];
+      const today = new Date();
+      const todayPct = pct(today.toISOString().slice(0, 10));
+
+      let html = `
+        <div style="position:relative;padding-left:250px;min-width:880px;">
+          <!-- Months Timeline Header -->
+          <div class="gantt-header">
+            ${months.map(m => {
+              const dt = new Date(m);
+              const name = dt.toLocaleDateString("en-GB", { month: "short", year: "numeric" });
+              return `<span class="gantt-month" style="left:${pct(m)}%;">${name}</span>`;
+            }).join("")}
+          </div>
+
+          <!-- Body with Bars & Today Line -->
+          <div style="position:relative;">
+            <!-- Today vertical indicator -->
+            <div class="gantt-today" style="left:${todayPct}%;"></div>
+            <div class="gantt-today-badge" style="left:${todayPct}%;">Today (${today.toLocaleDateString('en-GB', { day:'2-digit', month:'short'})})</div>
+
+            ${data.milestones.map(m => {
+              const left = pct(m.start);
+              const width = Math.max(1, pct(m.end) - left);
+              return `
+                <div class="gantt-row">
+                  <span class="gantt-lbl" style="color:${m.color};">${m.id}. ${m.name}</span>
+                  <div class="gantt-track">
+                    <div class="gantt-bar" style="left:${left}%;width:${width}%;background:${m.color}20;border-color:${m.color};">
+                      <!-- Inner solid bar showing checked completion from Page 1 -->
+                      <div class="gantt-bar-fill" style="width:${m.compPct}%;background:${m.color};"></div>
+                    </div>
+                  </div>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        </div>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    // -------------------------------------------------------------
+    // SECTION 1: MILESTONES TABLE (BELOW GANTT)
+    // -------------------------------------------------------------
+    function renderMilestonesTable(data) {
+      const tbody = document.getElementById("milestones-table-body");
+      tbody.innerHTML = data.milestones.map(m => {
+        let badgeCls = "status-pending";
+        if (m.status === "Completed") badgeCls = "status-done";
+        if (m.status === "In Progress") badgeCls = "status-progress";
+
+        return `
+          <tr>
+            <td><strong>#${m.id}</strong></td>
+            <td><strong>${m.name}</strong><br><span style="font-size:11px;color:var(--text-muted);">${m.start} to ${m.end}</span></td>
+            <td><span class="layer-tag">${m.layer}</span></td>
+            <td>${m.days} days</td>
+            <td><strong>${m.weight.toFixed(2)}%</strong></td>
+            <td>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <div class="bar-track" style="margin:0;flex:1;height:8px;">
+                  <div class="bar-fill" style="width:${m.compPct}%;background:${m.color};"></div>
+                </div>
+                <strong style="color:${m.color};font-size:12px;min-width:44px;">${m.compPct.toFixed(1)}%</strong>
+              </div>
+            </td>
+            <td><span class="status-badge ${badgeCls}">${m.status}</span></td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    // -------------------------------------------------------------
+    // SECTION 2: WEIGHTAGE PROOF & JUSTIFICATIONS (BELOW GANTT)
+    // -------------------------------------------------------------
+    function renderJustificationTable(data) {
+      const tbody = document.getElementById("justification-table-body");
+      tbody.innerHTML = data.milestones.map(m => `
+        <tr>
+          <td><strong>#${m.id}</strong></td>
+          <td><strong style="color:var(--navy);">${m.name}</strong></td>
+          <td><strong>${m.days}</strong></td>
+          <td><span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--navy);">${m.weight.toFixed(2)}%</span></td>
+          <td style="line-height:1.45;color:var(--text-main);">${m.justification}</td>
+        </tr>
+      `).join("");
+    }
+
+    function renderLayerRollupTable(data) {
+      const tbody = document.getElementById("layer-rollup-table-body");
+      const layerExplanations = {
+        "frontend": "Covers the entire 18-screen user experience, Beat Trio HUD, and Socratic reflection dialogue interfaces.",
+        "3d": "The largest architectural workload: VRoid character creation, Mixamo bone retargeting, 3D Ancient Codex mesh, walkable room blueprints, and Zeigarnik opacity shaders.",
+        "database": "High-criticality foundation: Managed Neon PostgreSQL cluster, pgvector vector indexing, and 19 Drizzle ORM relational schema tables.",
+        "backend": "Session security, NextAuth token validation, OTP email verification routes, and progress persistence APIs.",
+        "ai": "The core anti-hallucination engine: PDF extraction, heading-based chunker, Nomic vector embeddings, and scoped pgvector RAG retrieval.",
+        "game_logic": "Deterministic educational mechanics: Domain XP Generation Bonus formula, Insight Points participation metric, and Teusner Struggle Delta calculator.",
+        "planning": "Curriculum topic tree from textbook, formal FYP thesis documentation, 7 research papers literature defense, and presentation slide deck.",
+        "integration": "End-to-end multi-layer wiring, WebGL 60 FPS performance profiling across student laptops, cross-browser audits, and bug fixes."
+      };
+
+      tbody.innerHTML = data.layers.map(l => {
+        const milestoneNames = l.milestones.map(m => `#${m.id} ${m.name}`).join(", ");
+        return `
+          <tr>
+            <td><strong style="color:${l.color};">${l.name}</strong></td>
+            <td style="font-size:11px;color:var(--text-muted);">${milestoneNames}</td>
+            <td><strong>${l.days} days</strong></td>
+            <td><span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--navy);">${l.weight.toFixed(2)}%</span></td>
+            <td style="font-size:12px;color:var(--text);">${layerExplanations[l.key] || ''}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    // -------------------------------------------------------------
+    // NAVIGATION & TOGGLES
+    // -------------------------------------------------------------
+    function switchPage(pageId) {
+      document.querySelectorAll(".page-view").forEach(p => p.classList.remove("active"));
+      document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+
+      document.getElementById(pageId).classList.add("active");
+      if (pageId === "page-progress") {
+        document.getElementById("tab-btn-1").classList.add("active");
+      } else {
+        document.getElementById("tab-btn-2").classList.add("active");
+      }
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function setGrouping(group) {
+      state.grouping = group;
+      document.getElementById("btn-toggle-layers").classList.toggle("active", group === "layers");
+      document.getElementById("btn-toggle-milestones").classList.toggle("active", group === "milestones");
+      saveState();
+      renderApp();
+    }
+
+    // Initialize
+    window.addEventListener("DOMContentLoaded", () => {
+      loadState();
+      renderApp();
+    });
+  </script>
+</body>
+</html>
