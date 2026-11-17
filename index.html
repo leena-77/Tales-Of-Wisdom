@@ -1036,10 +1036,7 @@
   </main>
 
   <script>
-    // -------------------------------------------------------------
-    // TALES OF WISDOM DATA MODEL (CHECKLISTS, MILESTONES & LAYERS)
-    // -------------------------------------------------------------
-    // =============================================================
+// =============================================================
     // TALES OF WISDOM DATA MODEL WITH FAIR LOGICAL TASK WEIGHTS
     // =============================================================
     const GANTT_COLORS = {
@@ -1149,10 +1146,10 @@
         justification: "Complex spatial environment: walkable 3D rooms with keyboard/mouse navigation, bounding-box collision detection, interactive clickable puzzle pedestals, multi-room blueprint switching, and Shadow confrontation triggers.",
         items: [
           { id: "m6-1", text: "Build walkable 3D room environment with keyboard/mouse navigation", share: 25 },
-          { id: "m6-2", "text": "Implement collision boundaries preventing avatar clipping through walls", share: 20 },
-          { id: "m6-3", "text": "Add clickable puzzle pedestals that open challenge modal overlays", share: 20 },
-          { id: "m6-4", "text": "Design two reusable room blueprints (The Kingdom and The Archive)", share: 20 },
-          { id: "m6-5", "text": "Wire Shadow antagonist visual confrontation trigger when meter reaches 100", share: 15 }
+          { id: "m6-2", text: "Implement collision boundaries preventing avatar clipping through walls", share: 20 },
+          { id: "m6-3", text: "Add clickable puzzle pedestals that open challenge modal overlays", share: 20 },
+          { id: "m6-4", text: "Design two reusable room blueprints (The Kingdom and The Archive)", share: 20 },
+          { id: "m6-5", text: "Wire Shadow antagonist visual confrontation trigger when meter reaches 100", share: 15 }
         ]
       },
       {
@@ -1294,10 +1291,10 @@
         console.warn("Could not load state:", e);
       }
       return {
-        activePage: "page-checklists", // 'page-checklists' or 'page-gantt'
-        grouping: "layers",            // 'layers' or 'milestones'
-        checkedItems: {},              // itemId -> true
-        expandedCards: {},             // cardId -> true/false
+        activePage: "page-progress", // 'page-progress' or 'page-gantt'
+        grouping: "layers",          // 'layers' or 'milestones'
+        checkedItems: {},            // itemId -> true
+        expandedCards: {},           // cardId -> true/false
         lastSaved: null
       };
     }
@@ -1308,21 +1305,14 @@
       try {
         state.lastSaved = new Date().toISOString();
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-        updateLastSavedDisplay();
+        const el = document.getElementById("save-pill");
+        if (el) {
+          const d = new Date(state.lastSaved);
+          el.textContent = "✓ Saved " + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
       } catch (e) {
         console.warn("Could not save state:", e);
       }
-    }
-
-    function updateLastSavedDisplay() {
-      const el = document.getElementById("last-saved-time");
-      if (!el) return;
-      if (!state.lastSaved) {
-        el.textContent = "Saved locally";
-        return;
-      }
-      const d = new Date(state.lastSaved);
-      el.textContent = "Saved " + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
 
     function toggleCheck(itemId, ev) {
@@ -1369,7 +1359,7 @@
     }
 
     // -------------------------------------------------------------
-    // FAIR LOGICAL PROGRESS CALCULATIONS
+    // PROGRESS CALCULATIONS (FAIR LOGICAL WEIGHTAGE)
     // -------------------------------------------------------------
     function calculateProgress() {
       const TOTAL_DAYS = 518;
@@ -1380,7 +1370,7 @@
 
       const today = new Date();
 
-      // 1. Calculate each milestone with honest fair item weights
+      // 1. Calculate milestones with exact task shares and project contributions
       const milestoneResults = MILESTONES_DATA.map(m => {
         const s = new Date(m.start);
         const e = new Date(m.end);
@@ -1388,7 +1378,7 @@
         const mWeight = (days / TOTAL_DAYS) * 100; // Exact project weight (%)
 
         let checkedCount = 0;
-        let actualMShareEarned = 0; // Sum of item shares (0 to 100%)
+        let actualMShareEarned = 0; // Sum of task shares (0 to 100%)
 
         const enrichedItems = (m.items || []).map(it => {
           const isDone = !!state.checkedItems[it.id];
@@ -1514,16 +1504,22 @@
 
       // Top KPI Cards: 50% Mid-Term & 100% Final-Term Targets
       const midpointProgress = Math.min(100, (data.overallActual / 50) * 100);
-      document.getElementById("kpi-midpoint-val").innerHTML = `${data.overallActual.toFixed(1)}% <span style="font-size:14px;font-weight:600;color:var(--text-subtle);">/ 50%</span>`;
+      const midValEl = document.getElementById("kpi-midpoint-val");
+      if (midValEl) midValEl.innerHTML = `${data.overallActual.toFixed(1)}% <span style="font-size:14px;font-weight:600;color:var(--text-subtle);">/ 50%</span>`;
+      
       const midBar = document.getElementById("kpi-midpoint-bar");
-      midBar.style.width = `${midpointProgress}%`;
+      if (midBar) {
+        midBar.style.width = `${midpointProgress}%`;
+        midBar.style.background = data.overallActual >= 50 ? "var(--green)" : "var(--amber)";
+      }
 
-      if (data.overallActual >= 50) {
-        document.getElementById("kpi-midpoint-sub").innerHTML = `<span style="color:var(--green);font-weight:700;">✓ 50% Mid-term reached!</span>`;
-        midBar.style.background = "var(--green)";
-      } else {
-        document.getElementById("kpi-midpoint-sub").textContent = `${midpointProgress.toFixed(1)}% of 50% target reached`;
-        midBar.style.background = "var(--amber)";
+      const midSubEl = document.getElementById("kpi-midpoint-sub");
+      if (midSubEl) {
+        if (data.overallActual >= 50) {
+          midSubEl.innerHTML = `<span style="color:var(--green);font-weight:700;">✓ 50% Mid-term reached!</span>`;
+        } else {
+          midSubEl.textContent = `${midpointProgress.toFixed(1)}% of mid-term milestone reached`;
+        }
       }
 
       // Final-Term Target (100%)
@@ -1531,19 +1527,42 @@
       if (finalValEl) finalValEl.innerHTML = `${data.overallActual.toFixed(1)}% <span style="font-size:14px;font-weight:600;color:var(--text-subtle);">/ 100%</span>`;
       const finalBar = document.getElementById("kpi-final-bar");
       if (finalBar) finalBar.style.width = `${Math.min(100, data.overallActual)}%`;
-      const finalSubEl = document.getElementById("kpi-final-sub");
-      if (finalSubEl) finalSubEl.textContent = `${data.overallActual.toFixed(1)}% of total FYP completed`;
+      const tCountEl = document.getElementById("kpi-tasks-count");
+      if (tCountEl) tCountEl.textContent = `${data.totalChecked} of ${data.totalItems} deliverables verified`;
 
-      // Deliverables counter
-      document.getElementById("kpi-checked-val").textContent = `${data.totalChecked} / ${data.totalItems}`;
-      document.getElementById("kpi-checked-sub").textContent = `${data.totalItems - data.totalChecked} pending items`;
+      // Deliverables Status Count
+      const pendingCount = data.totalItems - data.totalChecked;
+      const vEl = document.getElementById("kpi-verified-count");
+      if (vEl) vEl.innerHTML = `${data.totalChecked} <span style="font-size:14px;font-weight:600;color:var(--text-subtle);">Done</span>`;
+      const pEl = document.getElementById("kpi-pending-count");
+      if (pEl) pEl.textContent = `${pendingCount} items pending completion`;
 
-      // Render Checklists View (Page 1)
-      const container = document.getElementById("checklists-container");
+      const deadline = new Date("2026-12-01");
+      const rem = Math.round((deadline - new Date()) / (1000 * 60 * 60 * 24));
+      const daysLeftEl = document.getElementById("kpi-days-left");
+      if (daysLeftEl) daysLeftEl.textContent = rem > 0 ? `${rem} days` : "Deadline Reached";
+
+      // Render Cards on Page 1 (Collapsible, only headings show by default)
+      renderPage1Cards(data);
+
+      // Render Gantt on Page 2
+      renderGanttChart(data);
+
+      // Render Section 1 below Gantt
+      renderMilestonesTable(data);
+
+      // Render Section 2 below Gantt (Justification & Proof)
+      renderJustificationTable(data);
+      renderLayerRollupTable(data);
+    }
+
+    function renderPage1Cards(data) {
+      const mount = document.getElementById("cards-mount");
+      if (!mount) return;
       let html = "";
 
       if (state.grouping === "layers") {
-        // Group by Architectural Layers (Collapsible)
+        // Group by Layers (Collapsible)
         data.layers.forEach(l => {
           const cardId = "layer-" + l.key;
           const isExpanded = !!state.expandedCards[cardId];
@@ -1676,19 +1695,77 @@
         });
       }
 
-      container.innerHTML = html;
-
-      // Render Page 2 Tables
-      renderMilestonesTable(data.milestones);
-      renderJustificationTable(data.milestones);
-      renderLayerRollup(data.layers);
+      mount.innerHTML = html;
     }
 
-    function renderMilestonesTable(milestones) {
+    function renderGanttChart(data) {
+      const container = document.getElementById("gantt-mount");
+      if (!container) return;
+
+      const START = new Date("2026-08-01");
+      const END = new Date("2027-05-31");
+      const totalSpan = (END - START) / (1000 * 60 * 60 * 24);
+
+      function pct(dStr) {
+        const d = new Date(dStr);
+        return Math.max(0, Math.min(100, ((d - START) / (1000 * 60 * 60 * 24) / totalSpan) * 100));
+      }
+
+      const months = ["2026-08-01", "2026-09-01", "2026-10-01", "2026-11-01", "2026-12-01", "2027-01-01", "2027-02-01", "2027-03-01", "2027-04-01", "2027-05-01"];
+      const today = new Date();
+      const todayPct = pct(today.toISOString().slice(0, 10));
+
+      let html = `
+        <div style="position:relative;padding-left:250px;min-width:880px;">
+          <!-- Months Timeline Header -->
+          <div class="gantt-header">
+            ${months.map(m => {
+              const dt = new Date(m);
+              const name = dt.toLocaleDateString("en-GB", { month: "short", year: "2-digit" });
+              const left = pct(m);
+              return `<div class="gantt-month" style="left:${left}%;">${name}</div>`;
+            }).join("")}
+          </div>
+
+          <!-- Vertical today marker line -->
+          <div class="gantt-today-line" style="left:${todayPct}%;">
+            <div class="gantt-today-badge">Today (${today.toLocaleDateString("en-GB", { day: 'numeric', month: 'short' })})</div>
+          </div>
+
+          <!-- Gantt Rows -->
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px;">
+            ${data.milestones.map(m => {
+              const left = pct(m.start);
+              const right = pct(m.end);
+              const width = Math.max(1.5, right - left);
+
+              return `
+                <div class="gantt-row">
+                  <div class="gantt-row-label">
+                    <span class="tag-badge" style="background:${m.color};font-size:10px;padding:2px 6px;">M${m.id}</span>
+                    <span style="font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${m.name}">${m.name}</span>
+                  </div>
+                  <div class="gantt-track">
+                    <div class="gantt-bar" style="left:${left}%;width:${width}%;background:${m.color};">
+                      <div class="gantt-bar-progress" style="width:${m.compPct}%;"></div>
+                      <span class="gantt-bar-text">${m.days}d • ${m.weight.toFixed(1)}%</span>
+                    </div>
+                  </div>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        </div>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    function renderMilestonesTable(data) {
       const tbody = document.getElementById("milestones-table-body");
       if (!tbody) return;
 
-      tbody.innerHTML = milestones.map(m => {
+      tbody.innerHTML = data.milestones.map(m => {
         let statusBadge = "";
         if (m.status === "Completed") {
           statusBadge = `<span class="badge" style="background:#D8EFE0;color:var(--green);font-size:11px;">Completed</span>`;
@@ -1713,7 +1790,7 @@
                 <span style="font-weight:700;font-size:12px;color:var(--navy);min-width:45px;">${m.compPct.toFixed(1)}%</span>
               </div>
               <div style="font-size:10.5px;color:var(--text-subtle);margin-top:2px;">
-                Contributes ${m.actualProjectEarned.toFixed(2)}% / ${m.weight.toFixed(2)}% of FYP
+                Earned ${m.actualProjectEarned.toFixed(2)}% / ${m.weight.toFixed(2)}% of FYP
               </div>
             </td>
             <td>${statusBadge}</td>
@@ -1722,11 +1799,11 @@
       }).join("");
     }
 
-    function renderJustificationTable(milestones) {
+    function renderJustificationTable(data) {
       const tbody = document.getElementById("justification-table-body");
       if (!tbody) return;
 
-      tbody.innerHTML = milestones.map(m => {
+      tbody.innerHTML = data.milestones.map(m => {
         return `
           <tr>
             <td style="font-weight:700;color:var(--navy);">M${m.id}</td>
@@ -1739,11 +1816,11 @@
       }).join("");
     }
 
-    function renderLayerRollup(layers) {
+    function renderLayerRollupTable(data) {
       const tbody = document.getElementById("layer-rollup-table-body");
       if (!tbody) return;
 
-      tbody.innerHTML = layers.map(l => {
+      tbody.innerHTML = data.layers.map(l => {
         return `
           <tr>
             <td style="font-weight:600;color:var(--navy);">
@@ -1774,23 +1851,26 @@
     // -------------------------------------------------------------
     function switchPage(pageId) {
       state.activePage = pageId;
-      document.querySelectorAll(".page-container").forEach(el => el.classList.remove("active"));
+      document.querySelectorAll(".page-view").forEach(el => el.classList.remove("active"));
       document.querySelectorAll(".nav-btn").forEach(el => el.classList.remove("active"));
 
       const pageEl = document.getElementById(pageId);
       if (pageEl) pageEl.classList.add("active");
 
-      const navBtn = document.getElementById("nav-" + pageId);
-      if (navBtn) navBtn.classList.add("active");
+      const btn1 = document.getElementById("tab-btn-1");
+      const btn2 = document.getElementById("tab-btn-2");
+      if (pageId === "page-progress" && btn1) btn1.classList.add("active");
+      if (pageId === "page-gantt" && btn2) btn2.classList.add("active");
 
       saveState();
     }
 
-    function switchGrouping(grouping) {
+    function setGrouping(grouping) {
       state.grouping = grouping;
-      document.querySelectorAll(".toggle-pill-btn").forEach(el => el.classList.remove("active"));
-      const btn = document.getElementById("toggle-" + grouping);
-      if (btn) btn.classList.add("active");
+      const btnL = document.getElementById("btn-toggle-layers");
+      const btnM = document.getElementById("btn-toggle-milestones");
+      if (btnL) btnL.classList.toggle("active", grouping === "layers");
+      if (btnM) btnM.classList.toggle("active", grouping === "milestones");
 
       saveState();
       renderApp();
@@ -1798,14 +1878,19 @@
 
     function initApp() {
       // Restore page
-      switchPage(state.activePage || "page-checklists");
+      switchPage(state.activePage || "page-progress");
 
       // Restore grouping
-      switchGrouping(state.grouping || "layers");
+      setGrouping(state.grouping || "layers");
 
       // Initial render
       renderApp();
-      updateLastSavedDisplay();
+      
+      const el = document.getElementById("save-pill");
+      if (el && state.lastSaved) {
+        const d = new Date(state.lastSaved);
+        el.textContent = "✓ Saved " + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
     }
 
     window.addEventListener("DOMContentLoaded", initApp);
